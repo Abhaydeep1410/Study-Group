@@ -16,7 +16,6 @@ public class Base62Encoder {
 
     public static int decode(String input) {
         int num = 0;
-
         for (int i = 0; i < input.length(); i++) {
             num = num * 62 + BASE62.indexOf(input.charAt(i));
         }

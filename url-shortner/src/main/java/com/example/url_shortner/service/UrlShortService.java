@@ -18,16 +18,16 @@ public class UrlShortService {
         if (urlRequestDto.url() == null || urlRequestDto.url().isBlank()) {
             throw new IllegalArgumentException("url is empty");
         }
-
-        return urlRepository.findByOriginalUrl(urlRequestDto.url())
+        String normalizedUrl = normalizeUrl(urlRequestDto.url());
+        return urlRepository.findByOriginalUrl(normalizedUrl)
                 .map(existing -> new UrlResponseDto(
                         existing.getOriginalUrl(),
                         Base62Encoder.encode(existing.getId())))
                 .orElseGet(() -> {
                             Url url = new Url();
-                            url.setOriginalUrl(urlRequestDto.url());
+                            url.setOriginalUrl(normalizedUrl);
                             Url saved = urlRepository.save(url);
-                            return new UrlResponseDto(url.getOriginalUrl(), Base62Encoder.encode(saved.getId()));
+                            return new UrlResponseDto(saved.getOriginalUrl(), Base62Encoder.encode(saved.getId()));
                         }
                 );
 
@@ -38,9 +38,17 @@ public class UrlShortService {
             throw new IllegalArgumentException("short code is empty");
         }
         int id = Base62Encoder.decode(shortCode);
+        System.out.println("Decoded ID: " + id);
         Url url = urlRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("URL not found"));
         return url.getOriginalUrl();
 
+    }
+
+    private String normalizeUrl(String url) {
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+            return "https://" + url;
+        }
+        return url;
     }
 }

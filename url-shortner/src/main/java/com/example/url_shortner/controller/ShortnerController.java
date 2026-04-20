@@ -22,12 +22,12 @@ public class ShortnerController {
                 .body(urlShortService.createShortUrl(dto));
     }
 
-    @GetMapping("/{shortCode}")
+    @GetMapping("/{shortCode:[a-zA-Z0-9]+}")
     ResponseEntity<String> getUrl(@PathVariable String shortCode) {
         return ResponseEntity.
-                status(HttpStatus.MOVED_PERMANENTLY)
+                status(HttpStatus.FOUND)
                 .location(URI.create(urlShortService.getUrl(shortCode)))
                 .build();
     }
-    
+
 }
